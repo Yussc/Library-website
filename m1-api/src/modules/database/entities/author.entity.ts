@@ -5,10 +5,16 @@ export class authorEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: number;
 
-  @Column({ name: 'name', type: 'varchar' })
-  title: string;
+  @Column({ name: 'first_name', type: 'varchar' })
+  first_name: string;
 
-  @Column({ name: 'year_published', type: 'int' })
-  yearPublished: number;
+  @Column({ name: 'last_name', type: 'varchar' })
+  last_name: string;
+
+  @Column({ name: 'bio', type: 'varchar' })
+  bio: string;
+
+  @Column({ name: 'picture', type: 'varchar' })
+  picture: string;
 
 }

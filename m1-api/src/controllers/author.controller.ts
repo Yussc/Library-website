@@ -2,7 +2,7 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { AppService } from '../app.service';
 
 @Controller('authors')
-export class authorController {
+export class AuthorController {
   constructor(private readonly authorService: AppService) {}
 
   @Get('/authors')

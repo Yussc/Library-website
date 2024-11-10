@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Book } from '../models/book';
 import { DataSource } from 'typeorm';
 import { BookEntity } from 'src/modules/database/entities/book.entity';
 
