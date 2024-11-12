@@ -14,7 +14,7 @@ export class ReviewRepository {
   async findByBookId(book_id: number):  Promise<Review[]> | undefined {
     
     let reviewEntities : reviewEntity[] = await this.reviewRepository.find({where : {book_id} });
-    let reviews : Review[];
+    let reviews : Review[] = [];
 
     for(let reviewEntity of reviewEntities) {
         reviews.push(new Review(reviewEntity))

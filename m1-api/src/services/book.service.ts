@@ -5,9 +5,11 @@ import { Book } from 'src/models/book.model';
 import { Author } from 'src/models/author.model';
 import { BookEntity } from 'src/modules/database/entities/book.entity';
 import { authorEntity } from 'src/modules/database/entities/author.entity';
-import { reviewEntity } from 'src/modules/database/entities/review.entity';
 import { ReviewRepository } from 'src/repositories/review.repository';
 import { Review } from 'src/models/review.model';
+import { bookPresenter } from 'src/presenters/book.presenter';
+import { BookDetail } from 'src/models/bookdetail.model';
+import { BookSum } from 'src/models/booksum.model';
 
 @Injectable()
 export class BookService {
@@ -18,27 +20,31 @@ export class BookService {
 
   ) {}
 
-  async findUserById(id: number) {
-    let book : BookEntity = await this.bookRepository.findById(id);
-    let author : authorEntity = await this.authorRepository.findById(book.author_id);
+  async findUserById(id: number) : Promise<BookDetail> {
+    let bookEntity : BookEntity = await this.bookRepository.findById(id);
+    let author : authorEntity = await this.authorRepository.findById(bookEntity.author_id);
     let reviews : Review[] = await this.reviewRepository.findByBookId(id)
 
+    let book : Book = new Book(bookEntity ,new Author(author),reviews);
+    let BookPresenter : bookPresenter = new bookPresenter(book);
 
 
-    return new Book(book ,new Author(author),reviews);
+    return BookPresenter.BookDetail();
     
   }
 
-  async findAll() {
+  async findAll() : Promise<BookSum[]> {
     let booksEntities : BookEntity[] = await this.bookRepository.findAll();
-    let books : Book[] = [];
+    let books : BookSum[] = [];
 
     for(let bookEntity of booksEntities) {
-      let book : BookEntity = await this.bookRepository.findById(bookEntity.id);
-      let author : authorEntity = await this.authorRepository.findById(book.author_id);
+      let author : authorEntity = await this.authorRepository.findById(bookEntity.author_id);
       let reviews : Review[] = await this.reviewRepository.findByBookId(bookEntity.id)
 
-      books.push(new Book(book ,new Author(author),reviews));
+      let book : Book = new Book(bookEntity ,new Author(author),reviews);
+      let BookPresenter : bookPresenter = new bookPresenter(book);
+
+      books.push(BookPresenter.BookSum());
     }
 
     return books;
