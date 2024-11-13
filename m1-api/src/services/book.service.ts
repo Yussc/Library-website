@@ -10,6 +10,7 @@ import { Review } from 'src/models/review.model';
 import { bookPresenter } from 'src/presenters/book.presenter';
 import { BookDetail } from 'src/models/bookdetail.model';
 import { BookSum } from 'src/models/booksum.model';
+import { CreateBookDTO } from 'src/DTOs/book.dto';
 
 @Injectable()
 export class BookService {
@@ -49,6 +50,16 @@ export class BookService {
 
     return books;
 
+  }
+
+  async create(bookDTO : CreateBookDTO) : Promise<void> {
+    let bookEntity = new BookEntity();
+    bookEntity.author_id = bookDTO.authorId;
+    bookEntity.title = bookDTO.title;
+    bookEntity.price = bookDTO.price;
+    bookEntity.yearPublished = bookDTO.yearPublished;
+    bookEntity.reviewsCount = 0;
+    this.bookRepository.create(bookEntity);
   }
 
 

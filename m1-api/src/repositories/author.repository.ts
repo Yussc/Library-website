@@ -17,4 +17,9 @@ export class AuthorRepository {
   findAll() :  Promise<authorEntity[]> | undefined {
     return this.authorRepository.find();
   }
+
+  create(AuthorEntity : authorEntity) : Promise<void> | undefined {
+    this.authorRepository.insert(AuthorEntity);
+    return;
+  }
 }
