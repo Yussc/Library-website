@@ -13,7 +13,17 @@ export class BookRepository {
     return this.bookRepository.findOne({where : {id} });
   }
 
+  findByAuthorId(author_id: number):  Promise<BookEntity[]> | undefined {
+    return this.bookRepository.find({where : {author_id} });
+  }
+
   findAll() :  Promise<BookEntity[]> | undefined {
     return this.bookRepository.find();
+  }
+
+  create(bookEntity : BookEntity) : Promise<void> | undefined {
+    console.log(bookEntity)
+    this.bookRepository.insert(bookEntity);
+    return;
   }
 }

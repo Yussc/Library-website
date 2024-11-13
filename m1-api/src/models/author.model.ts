@@ -10,12 +10,13 @@ export class Author {
     bio : string;
     books : Book[];
 
-    constructor( author : authorEntity) {
+    constructor( author : authorEntity, books : Book[] = null) {
         this.id = author.id;
         this.last_name = author.last_name;
         this.first_name = author.first_name;
         this.picture = author.picture;
         this.bio = author.bio;
+        this.books = books;
     }
 
 }
