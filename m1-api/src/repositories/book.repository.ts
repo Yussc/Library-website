@@ -30,4 +30,9 @@ export class BookRepository {
     this.bookRepository.delete(id);
     return;
   }
+
+  deleteByAuthorId(id : number) : Promise<void> | undefined {
+    this.bookRepository.delete({author_id:id});
+    return;
+  }
 }
