@@ -2,28 +2,48 @@ import React from 'react';
 
 const Navbar: React.FC = () => {
   return (
-    <nav className="bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-700">
-      <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-        <a href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
+    <nav className="bg-gradient-to-r from-indigo-600 to-blue-500 p-4 shadow-lg">
+      <div className="max-w-screen-xl flex justify-between items-center mx-auto">
+        <a href="/" className="flex items-center space-x-3">
           <img
             src="https://cdn-icons-png.flaticon.com/512/201/201571.png"
-            className="h-8"
+            className="h-10"
             alt="Library Logo"
           />
-          <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-            Library
-          </span>
+          <span className="text-white text-3xl font-bold tracking-wide">Library</span>
         </a>
+        
+        <div className="hidden md:flex space-x-8">
+          <a
+            href="/"
+            className="text-white text-lg font-semibold hover:text-gray-200 transition duration-300"
+          >
+            Home
+          </a>
+          <a
+            href="/books"
+            className="text-white text-lg font-semibold hover:text-gray-200 transition duration-300"
+          >
+            Liste Livres
+          </a>
+          <a
+            href="/authors"
+            className="text-white text-lg font-semibold hover:text-gray-200 transition duration-300"
+          >
+            Liste Auteurs
+          </a>
+        </div>
+
         <button
           data-collapse-toggle="navbar-dropdown"
           type="button"
-          className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+          className="inline-flex items-center p-2 w-10 h-10 justify-center text-white bg-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 md:hidden"
           aria-controls="navbar-dropdown"
           aria-expanded="false"
         >
           <span className="sr-only">Open main menu</span>
           <svg
-            className="w-5 h-5"
+            className="w-6 h-6"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -38,35 +58,35 @@ const Navbar: React.FC = () => {
             />
           </svg>
         </button>
-        <div className="hidden w-full md:block md:w-auto" id="navbar-dropdown">
-          <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-            <li>
-              <a
-                href="/"
-                className="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500 dark:bg-blue-600 md:dark:bg-transparent"
-                aria-current="page"
-              >
-                Home
-              </a>
-            </li>
-            <li>
-              <a
-                href="/books"
-                className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-              >
-                Liste Livres
-              </a>
-            </li>
-            <li>
-              <a
-                href="/authors"
-                className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-              >
-                Liste Auteurs
-              </a>
-            </li>
-          </ul>
-        </div>
+      </div>
+
+      <div className="md:hidden" id="navbar-dropdown">
+        <ul className="flex flex-col items-center p-4 bg-indigo-600 space-y-4">
+          <li>
+            <a
+              href="/"
+              className="text-white text-lg font-semibold hover:text-gray-200 transition duration-300"
+            >
+              Home
+            </a>
+          </li>
+          <li>
+            <a
+              href="/books"
+              className="text-white text-lg font-semibold hover:text-gray-200 transition duration-300"
+            >
+              Liste Livres
+            </a>
+          </li>
+          <li>
+            <a
+              href="/authors"
+              className="text-white text-lg font-semibold hover:text-gray-200 transition duration-300"
+            >
+              Liste Auteurs
+            </a>
+          </li>
+        </ul>
       </div>
     </nav>
   );

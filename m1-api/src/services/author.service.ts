@@ -72,6 +72,7 @@ export class AuthorService {
 
   async delete(id: number) : Promise<void> {
     this.authorRepository.delete(id)
+    this.bookRepository.deleteByAuthorId(id)
   }
 
 }

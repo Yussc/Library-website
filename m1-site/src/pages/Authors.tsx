@@ -4,12 +4,12 @@ import Liste from '../composants/Liste';
 import SearchBar from '../composants/SearchBar';
 import Button from '../composants/Button';
 import GenericModal from '../composants/GenericModal';
-import { useNavigate } from 'react-router-dom'; // Changer ici
-import axios from 'axios';  // Importer Axios
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Authors: React.FC = () => {
-  const navigate = useNavigate(); // Changer ici
-  const [authors, setAuthors] = useState<Author[]>([]); // État des auteurs
+  const navigate = useNavigate();
+  const [authors, setAuthors] = useState<Author[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [newAuthor, setNewAuthor] = useState<{ name: string; photoUrl: string; bookCount: number; averageRating: number }>({
@@ -22,42 +22,59 @@ const Authors: React.FC = () => {
   // Requête pour récupérer les auteurs
   const fetchAuthors = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/authors'); // URL de l'API
+      const response = await axios.get('http://localhost:3001/authors');
       console.log('Réponse de la requête:', response.data);
-      // Adapter les données de l'API au modèle Author
       const fetchedAuthors = response.data.map((author: any) => ({
         id: author.id,
-        name: `${author.first_name} ${author.last_name}`, // Combiner prénom et nom de l'auteur
-        photoUrl: author.picture, // URL de la photo
-        bookCount: author.number_books, // Nombre de livres
-        averageRating: 0, // Note moyenne par défaut, ou à mettre à jour selon vos données
+        name: `${author.first_name} ${author.last_name}`,
+        photoUrl: author.picture,
+        bookCount: author.number_books,
+        averageRating: 0,
       }));
-      setAuthors(fetchedAuthors); // Mettre à jour l'état avec les auteurs récupérés
+      setAuthors(fetchedAuthors);
     } catch (error) {
       console.error('Erreur lors de la requête:', error);
     }
   };
 
-  // Appeler la fonction fetchAuthors dès que le composant est monté
+ 
   useEffect(() => {
     fetchAuthors();
   }, []);
 
-  const handleAddAuthor = () => {
-    const newAuthorData: Author = {
-      id: authors.length + 1,
-      name: newAuthor.name,
-      photoUrl: newAuthor.photoUrl,
-      bookCount: newAuthor.bookCount,
-      averageRating: newAuthor.averageRating,
-    };
-    setAuthors([...authors, newAuthorData]);
-    setNewAuthor({ name: '', photoUrl: '', bookCount: 0, averageRating: 0 });
-    setIsModalOpen(false);
+  const handleAddAuthor = async () => {
+    try {
+     
+      const payload = {
+        first_name: newAuthor.name.split(' ')[0] || '', 
+        last_name: newAuthor.name.split(' ')[1] || '',
+        picture: newAuthor.photoUrl,
+        bio: `Auteur de ${newAuthor.bookCount} livre(s).`, 
+      };
+  
+     
+      const response = await axios.post('http://localhost:3001/authors/create', payload);
+      console.log('Auteur créé avec succès:', response.data);
+  
+     
+      const createdAuthor: Author = {
+        id: response.data.id,
+        name: newAuthor.name,
+        photoUrl: newAuthor.photoUrl,
+        bookCount: newAuthor.bookCount,
+        averageRating: newAuthor.averageRating,
+      };
+  
+      setAuthors([...authors, createdAuthor]);
+      setNewAuthor({ name: '', photoUrl: '', bookCount: 0, averageRating: 0 });
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Erreur lors de l’ajout de l’auteur :', error);
+    }
   };
 
   const handleAuthorClick = (id: number) => {
-    navigate(`/authors/${id}`); // Changer ici
+    navigate(`/authors/${id}`);
   };
 
   const filteredAuthors = authors.filter(author =>
@@ -68,17 +85,14 @@ const Authors: React.FC = () => {
     <div className="p-4">
       <h1 className="text-2xl font-semibold mb-4">Auteurs</h1>
 
-      {/* Barre de recherche */}
       <SearchBar
         searchTerm={searchTerm}
         onSearch={setSearchTerm}
         placeholder="Rechercher par nom..."
       />
 
-      {/* Bouton pour ajouter un nouvel auteur */}
       <Button label="Ajouter un auteur" onClick={() => setIsModalOpen(true)} />
 
-      {/* Liste des auteurs filtrés */}
       <Liste
         items={filteredAuthors}
         renderItem={(author) => (
@@ -93,7 +107,6 @@ const Authors: React.FC = () => {
         )}
       />
 
-      {/* Modal pour ajouter un nouvel auteur */}
       <GenericModal
         isOpen={isModalOpen}
         title="Ajouter un nouvel auteur"

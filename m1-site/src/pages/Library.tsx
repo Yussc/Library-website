@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';  // Importer Axios
+import axios from 'axios';  
+import { Link } from 'react-router-dom';
 import { Book } from '../models/BookModel';
 import Liste from '../composants/Liste';
 import SearchBar from '../composants/SearchBar';
@@ -8,51 +9,96 @@ import AddButton from '../composants/AddButton';
 import GenericModal from '../composants/GenericModal';
 
 const Library: React.FC = () => {
-  const [books, setBooks] = useState<Book[]>([]);  // Initialiser un état vide pour les livres
+  const [books, setBooks] = useState<Book[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortOption, setSortOption] = useState<string>('title');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [newBook, setNewBook] = useState<{ title: string; author: string; publicationDate: string }>({
+  const [newBook, setNewBook] = useState<{ title: string; author: string; publicationDate: string, price: string }>({
     title: '',
     author: '',
     publicationDate: '',
+    price: '',
   });
 
-  // Requête pour récupérer les livres
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/books'); // URL de l'API
+      const response = await axios.get('http://localhost:3001/books');
       console.log('Réponse de la requête:', response.data);
-      // Adapter les données de l'API au modèle Book
+     
       const fetchedBooks = response.data.map((book: any) => ({
         id: book.id,
         title: book.title,
-        author: `${book.author.first_name} ${book.author.last_name}`,  // Combiner prénom et nom de l'auteur
-        publicationDate: book.yearPublished.toString(),  // Adapter la date
-        averageRating: book.mean || 0,  // Si la moyenne est nulle, la mettre à 0
+        author: `${book.author.first_name} ${book.author.last_name}`, 
+        publicationDate: book.yearPublished.toString(), 
+        averageRating: book.mean || 0, 
       }));
-      setBooks(fetchedBooks); // Mettre à jour l'état avec les livres récupérés
+      setBooks(fetchedBooks); 
     } catch (error) {
       console.error('Erreur lors de la requête:', error);
     }
   };
 
-  // Appeler la fonction fetchData dès que le composant est monté
   useEffect(() => {
     fetchData();
   }, []);
 
-  const handleAddBook = () => {
-    const newBookData: Book = {
-      id: books.length + 1,
-      title: newBook.title,
-      author: newBook.author,
-      publicationDate: newBook.publicationDate,
-      averageRating: 0,
-    };
-    setBooks([...books, newBookData]);
-    setNewBook({ title: '', author: '', publicationDate: '' });
-    setIsModalOpen(false);
+  const handleAddBook = async () => {
+    // Validation des données
+    if (!newBook.title || !newBook.author || !newBook.publicationDate || !newBook.price) {
+      console.error('Tous les champs doivent être remplis');
+      return;
+    }
+
+    let authorId: number;
+
+    try {
+      // Vérification de l'existence de l'auteur dans la base de données
+      const authorResponse = await axios.get('http://localhost:3001/authors', {
+        params: {
+          first_name: newBook.author.split(' ')[0], // Séparation du prénom et nom
+          last_name: newBook.author.split(' ')[1],
+        }
+      });
+
+      if (authorResponse.data.length > 0) {
+        // Si l'auteur existe, on récupère son ID
+        authorId = authorResponse.data[0].id;
+      } else {
+        // Si l'auteur n'existe pas, on crée un nouvel auteur
+        const newAuthor = {
+          first_name: newBook.author.split(' ')[0],
+          last_name: newBook.author.split(' ')[1],
+        };
+        const createAuthorResponse = await axios.post('http://localhost:3001/authors/create', newAuthor);
+        authorId = createAuthorResponse.data.id; // On récupère l'ID de l'auteur créé
+      }
+
+      // Données du livre à envoyer
+      const newBookData = {
+        title: newBook.title,
+        authorId, // L'ID de l'auteur
+        yearPublished: parseInt(newBook.publicationDate, 10),
+        mean: 0,
+        price: parseFloat(newBook.price),
+      };
+
+      console.log('Données envoyées au serveur:', newBookData);
+
+      // Envoi de la requête pour ajouter le livre
+      const response = await axios.post('http://localhost:3001/books/create', newBookData);
+
+      console.log('Réponse du serveur lors de l\'ajout:', response.data);
+
+      // Rechargement des livres après ajout
+      fetchData();
+
+      // Réinitialisation des valeurs du formulaire après un ajout réussi
+      setNewBook({ title: '', author: '', publicationDate: '', price: '' });
+      setIsModalOpen(false);
+
+    } catch (error: any) {
+      console.error('Erreur lors de l\'ajout du livre:', error.response?.data || error.message);
+    }
   };
 
   const sortOptions = [
@@ -73,10 +119,10 @@ const Library: React.FC = () => {
     });
   };
 
-  // Filtrer les livres
-  const filteredBooks = books.filter(book => book.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredBooks = books.filter(book => 
+    book.title && book.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   
-  // Appliquer le tri sur les livres filtrés
   const sortedBooks = sortBooks(filteredBooks, sortOption);
 
   return (
@@ -91,12 +137,14 @@ const Library: React.FC = () => {
       <Liste
         items={sortedBooks}
         renderItem={(book) => (
-          <div key={book.id} className="p-4 border-b">
-            <h2 className="font-bold">{book.title}</h2>
-            <p>Auteur: {book.author}</p>
-            <p>Date de publication: {new Date(book.publicationDate).toLocaleDateString()}</p>
-            <p>Note moyenne: {book.averageRating}</p>
-          </div>
+          <Link to={`/books/${book.id}`}>
+            <div key={book.id} className="p-4 border-b cursor-pointer">
+              <h2 className="font-bold">{book.title}</h2>
+              <p>Auteur: {book.author}</p>
+              <p>Date de publication: {new Date(book.publicationDate).toLocaleDateString()}</p>
+              <p>Note moyenne: {book.averageRating}</p>
+            </div>
+          </Link>
         )}
       />
 
@@ -125,6 +173,13 @@ const Library: React.FC = () => {
           type="date"
           value={newBook.publicationDate}
           onChange={(e) => setNewBook({ ...newBook, publicationDate: e.target.value })}
+          className="border p-2 rounded mb-4 w-full"
+        />
+        <input
+          type="number"
+          placeholder="Prix"
+          value={newBook.price}
+          onChange={(e) => setNewBook({ ...newBook, price: e.target.value })}
           className="border p-2 rounded mb-4 w-full"
         />
       </GenericModal>

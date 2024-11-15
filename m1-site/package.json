@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
     "@heroicons/react": "^2.1.5",
     "@material-tailwind/react": "^2.1.10",
+    "@mui/icons-material": "^6.1.7",
     "@mui/material": "^6.1.5",
     "@nestjs/axios": "^3.1.2",
     "@nestjs/typeorm": "^10.0.2",
