@@ -1,20 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Author } from '../models/AuthorModel';
 import Liste from '../composants/Liste';
 import SearchBar from '../composants/SearchBar';
 import Button from '../composants/Button';
 import GenericModal from '../composants/GenericModal';
 import { useNavigate } from 'react-router-dom'; // Changer ici
-
-const initialAuthors: Author[] = [
-  { id: 1, name: 'Author 1', photoUrl: '/images/author1.jpg', bookCount: 5, averageRating: 4.2 },
-  { id: 2, name: 'Author 2', photoUrl: '/images/author2.jpg', bookCount: 3, averageRating: 4.0 },
-  { id: 3, name: 'Author 3', photoUrl: '/images/author3.jpg', bookCount: 7, averageRating: 4.5 },
-];
+import axios from 'axios';  // Importer Axios
 
 const Authors: React.FC = () => {
   const navigate = useNavigate(); // Changer ici
-  const [authors, setAuthors] = useState<Author[]>(initialAuthors);
+  const [authors, setAuthors] = useState<Author[]>([]); // État des auteurs
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [newAuthor, setNewAuthor] = useState<{ name: string; photoUrl: string; bookCount: number; averageRating: number }>({
@@ -23,6 +18,30 @@ const Authors: React.FC = () => {
     bookCount: 0,
     averageRating: 0,
   });
+
+  // Requête pour récupérer les auteurs
+  const fetchAuthors = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/authors'); // URL de l'API
+      console.log('Réponse de la requête:', response.data);
+      // Adapter les données de l'API au modèle Author
+      const fetchedAuthors = response.data.map((author: any) => ({
+        id: author.id,
+        name: `${author.first_name} ${author.last_name}`, // Combiner prénom et nom de l'auteur
+        photoUrl: author.picture, // URL de la photo
+        bookCount: author.number_books, // Nombre de livres
+        averageRating: 0, // Note moyenne par défaut, ou à mettre à jour selon vos données
+      }));
+      setAuthors(fetchedAuthors); // Mettre à jour l'état avec les auteurs récupérés
+    } catch (error) {
+      console.error('Erreur lors de la requête:', error);
+    }
+  };
+
+  // Appeler la fonction fetchAuthors dès que le composant est monté
+  useEffect(() => {
+    fetchAuthors();
+  }, []);
 
   const handleAddAuthor = () => {
     const newAuthorData: Author = {

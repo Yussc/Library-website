@@ -1,5 +1,5 @@
-// pages/Library.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';  // Importer Axios
 import { Book } from '../models/BookModel';
 import Liste from '../composants/Liste';
 import SearchBar from '../composants/SearchBar';
@@ -7,14 +7,8 @@ import SortSelector from '../composants/SortSelector';
 import AddButton from '../composants/AddButton';
 import GenericModal from '../composants/GenericModal';
 
-const initialBooks: Book[] = [
-  { id: 1, title: 'Book 1', author: 'Author 1', publicationDate: '2021-01-01', averageRating: 4.5 },
-  { id: 2, title: 'Book 2', author: 'Author 2', publicationDate: '2022-05-15', averageRating: 3.8 },
-  { id: 3, title: 'Book 3', author: 'Author 3', publicationDate: '2020-10-30', averageRating: 5.0 },
-];
-
 const Library: React.FC = () => {
-  const [books, setBooks] = useState<Book[]>(initialBooks);
+  const [books, setBooks] = useState<Book[]>([]);  // Initialiser un état vide pour les livres
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortOption, setSortOption] = useState<string>('title');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -23,6 +17,30 @@ const Library: React.FC = () => {
     author: '',
     publicationDate: '',
   });
+
+  // Requête pour récupérer les livres
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/books'); // URL de l'API
+      console.log('Réponse de la requête:', response.data);
+      // Adapter les données de l'API au modèle Book
+      const fetchedBooks = response.data.map((book: any) => ({
+        id: book.id,
+        title: book.title,
+        author: `${book.author.first_name} ${book.author.last_name}`,  // Combiner prénom et nom de l'auteur
+        publicationDate: book.yearPublished.toString(),  // Adapter la date
+        averageRating: book.mean || 0,  // Si la moyenne est nulle, la mettre à 0
+      }));
+      setBooks(fetchedBooks); // Mettre à jour l'état avec les livres récupérés
+    } catch (error) {
+      console.error('Erreur lors de la requête:', error);
+    }
+  };
+
+  // Appeler la fonction fetchData dès que le composant est monté
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleAddBook = () => {
     const newBookData: Book = {
