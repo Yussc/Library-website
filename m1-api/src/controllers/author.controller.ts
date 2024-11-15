@@ -4,6 +4,7 @@ import { Author } from 'src/models/author.model';
 import { AuthorService } from 'src/services/author.service';
 import { AuthorSum } from 'src/models/authorsum.model';
 import { createAuthorDTO } from 'src/DTOs/author.dto';
+import { ModifyAuthorDTO } from 'src/DTOs/modify_author.dto';
 
 @Controller('authors')
 export class AuthorController {
@@ -20,8 +21,14 @@ export class AuthorController {
   }
 
   @Post('/create')
-  public async createBook(@Body() input: createAuthorDTO) : Promise<string> {
+  public async createAuthor(@Body() input: createAuthorDTO) : Promise<string> {
     await this.authorService.create(input);
+    return 'ok';
+  }
+
+  @Post('/modify')
+  public async modifyAuthor(@Body() input: ModifyAuthorDTO) : Promise<string> {
+    await this.authorService.modify(input);
     return 'ok';
   }
 }

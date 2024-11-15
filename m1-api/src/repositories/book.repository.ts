@@ -22,7 +22,6 @@ export class BookRepository {
   }
 
   create(bookEntity : BookEntity) : Promise<void> | undefined {
-    console.log(bookEntity)
     this.bookRepository.insert(bookEntity);
     return;
   }
