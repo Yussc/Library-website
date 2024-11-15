@@ -23,4 +23,9 @@ export class ReviewRepository {
     return reviews;
   }
 
+  create(ReviewEntity : reviewEntity ) : Promise<void> | undefined {
+    this.reviewRepository.insert(ReviewEntity);
+    return;
+  }
+
 }

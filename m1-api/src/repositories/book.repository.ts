@@ -22,8 +22,12 @@ export class BookRepository {
   }
 
   create(bookEntity : BookEntity) : Promise<void> | undefined {
-    console.log(bookEntity)
     this.bookRepository.insert(bookEntity);
+    return;
+  }
+
+  delete(id : number) : Promise<void> | undefined {
+    this.bookRepository.delete(id);
     return;
   }
 }

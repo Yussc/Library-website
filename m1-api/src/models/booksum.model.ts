@@ -17,7 +17,7 @@ export class BookSum {
         this.mean = 0;
 
         for(let review of book.reviews){
-            this.mean += review.review;
+            this.mean += review.note;
         }
 
         this.mean /= book.reviews.length;

@@ -9,6 +9,7 @@ import { BookEntity } from 'src/modules/database/entities/book.entity';
 import { Review } from 'src/models/review.model';
 import { ReviewRepository } from 'src/repositories/review.repository';
 import { createAuthorDTO } from 'src/DTOs/author.dto';
+import { ModifyAuthorDTO } from 'src/DTOs/modify_author.dto';
 
 @Injectable()
 export class AuthorService {
@@ -65,5 +66,12 @@ export class AuthorService {
     this.authorRepository.create(AuthorEntity);
   }
 
+  async modify(authorDTO : ModifyAuthorDTO) : Promise<void> {
+    this.authorRepository.modify(authorDTO);
+  }
+
+  async delete(id: number) : Promise<void> {
+    this.authorRepository.delete(id)
+  }
 
 }
