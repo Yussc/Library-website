@@ -68,9 +68,10 @@ export class AuthorService {
 
   async modify(authorDTO : ModifyAuthorDTO) : Promise<void> {
     this.authorRepository.modify(authorDTO);
-
- 
   }
 
+  async delete(id: number) : Promise<void> {
+    this.authorRepository.delete(id)
+  }
 
 }

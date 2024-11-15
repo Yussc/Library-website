@@ -31,4 +31,9 @@ export class AuthorRepository {
     return;
 
   }
+
+  delete(id : number) : Promise<void> | undefined {
+    this.authorRepository.delete(id);
+    return;
+  }
 }

@@ -62,5 +62,8 @@ export class BookService {
     this.bookRepository.create(bookEntity);
   }
 
+  async delete(id: number) : Promise<void> {
+    this.bookRepository.delete(id)
+  }
 
 }

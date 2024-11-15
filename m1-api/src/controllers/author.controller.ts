@@ -31,4 +31,10 @@ export class AuthorController {
     await this.authorService.modify(input);
     return 'ok';
   }
+
+  @Get('/delete/:id')
+  public async delete(@Param('id') id: number) : Promise<string> {
+    await this.authorService.delete(id);
+    return 'ok';
+  }
 }
