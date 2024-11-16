@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import GenericModal from '../composants/GenericModal';
+
 
 interface Book {
   id: number;
@@ -21,14 +23,27 @@ const AuthorDetails: React.FC = () => {
   const navigate = useNavigate();
   const [author, setAuthor] = useState<Author | null>(null);
   const [availableBooks, setAvailableBooks] = useState<Book[]>([]);
-  const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false); 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [updatedFirstName, setUpdatedFirstName] = useState<string>('');
   const [updatedLastName, setUpdatedLastName] = useState<string>('');
   const [updatedBio, setUpdatedBio] = useState<string>('');
   const [updatedPicture, setUpdatedPicture] = useState<string>('');
+  const [isLibraryModalOpen, setIsLibraryModalOpen] = useState<boolean>(false); // état pour gérer le modal
+  const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
+  const [newBook, setNewBook] = useState<{
+    title: string;
+    author: number; // l'auteur est automatiquement celui de la page
+    publicationDate: number;
+    price: number;
+  }>({
+    title: '',
+    author: author ? author.id : 0, // l'auteur est pré-rempli avec l'ID de l'auteur
+    publicationDate: 0,
+    price: 0
+  });
 
+  // Fonction pour récupérer les détails de l'auteur
   useEffect(() => {
     const fetchAuthor = async () => {
       try {
@@ -43,7 +58,17 @@ const AuthorDetails: React.FC = () => {
       }
     };
 
+    const fetchAvailableBooks = async () => {
+      try {
+        const response = await axios.get<Book[]>('http://localhost:3001/books');
+        setAvailableBooks(response.data); // Récupérer tous les livres disponibles
+      } catch (error) {
+        console.error('Erreur lors de la récupération des livres disponibles :', error);
+      }
+    };
+
     fetchAuthor();
+    fetchAvailableBooks(); // Appeler la fonction pour récupérer les livres disponibles
   }, [id]);
 
   if (!author) {
@@ -76,31 +101,60 @@ const AuthorDetails: React.FC = () => {
     }
   };
 
-  const handleAddBookToAuthor = async () => {
-    if (!selectedBookId) return;
-
-    try {
-      const response = await axios.post(`http://localhost:3001/authors/${author.id}/books`, {
-        bookId: selectedBookId,
-      });
-
-      setAuthor({
-        ...author,
-        books: [...author.books, response.data], 
-      });
-
-      setSelectedBookId(null);
-    } catch (error) {
-      console.error('Erreur lors de l’ajout du livre à l’auteur :', error);
-    }
-  };
-
   const handleDeleteBook = async (bookId: number) => {
     try {
-      await axios.get(`http://localhost:3001/authors/delete/${bookId}`);
+      await axios.get(`http://localhost:3001/books/delete/${bookId}`);
       setAuthor({ ...author, books: author.books.filter((book) => book.id !== bookId) });
     } catch (error) {
       console.error('Erreur lors de la suppression du livre :', error);
+    }
+  };
+
+  const handleAddBook = async () => {
+    if (!newBook.title || !newBook.publicationDate || !newBook.price) {
+      console.error('Veuillez remplir tous les champs.');
+      return;
+    }
+
+    try {
+      const payload = {
+        title: newBook.title,
+        authorId: author.id, // l'auteur est automatiquement celui de la page
+        yearPublished: newBook.publicationDate,
+        mean:0,
+        price: newBook.price,
+      };
+
+      // Vérifiez que l'auteur est défini avant d'envoyer la requête
+      if (!author || !author.id) {
+        console.error("L'auteur est introuvable.");
+        return;
+      }
+      // Envoyer la requête pour ajouter le livre
+      const response = await axios.post('http://localhost:3001/books/create', payload);
+      console.log('Réponse du serveur lors de l\'ajout:', response.data);
+      
+
+      // Ajouter le livre dans l'état de l'auteur
+      setAuthor({
+        ...author,
+        books: [...author.books, response.data],
+      });
+
+
+      // Fermer le modal
+      setIsLibraryModalOpen(false);
+      setNewBook({
+        title: '',
+        author: author.id,
+        publicationDate: 0,
+        price: 0
+      });
+
+      // Recharger la page
+    window.location.reload();
+    } catch (error) {
+      console.error('Erreur lors de l’ajout du livre :', error);
     }
   };
 
@@ -192,31 +246,67 @@ const AuthorDetails: React.FC = () => {
       </ul>
 
       <div className="mt-4">
-        <h3 className="text-xl font-semibold mb-2">Ajouter un Livre existant</h3>
-
-        {/* Choix livres */}
-        <select
-          value={selectedBookId || ''}
-          onChange={(e) => setSelectedBookId(Number(e.target.value))}
-          className="border p-2 rounded mb-4"
-        >
-          <option value="">Choisir un livre</option>
-          {availableBooks.map((book) => (
-            <option key={book.id} value={book.id}>
-              {book.title}
-            </option>
-          ))}
-        </select>
+        <h3 className="text-xl font-semibold mb-2">Ajouter un Livre</h3>
 
         <button
-          onClick={handleAddBookToAuthor}
+          onClick={() => setIsLibraryModalOpen(true)} // Ouvrir le modal pour ajouter un livre
           className="bg-green-500 text-white px-4 py-2 rounded"
         >
-          Ajouter
+          Ajouter un Livre
         </button>
       </div>
 
-      {/* Modal Delete AUteur */}
+      {/* Modal pour ajouter un livre */}
+      <GenericModal
+        isOpen={isLibraryModalOpen}
+        title="Ajouter un nouveau livre"
+        onClose={() => setIsLibraryModalOpen(false)}
+        onAction={handleAddBook}
+        actionLabel="Ajouter"
+      >
+        <p> Titre : </p>
+        <input
+          type="text"
+          placeholder="Titre"
+          value={newBook.title}
+          onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
+          className="border p-2 rounded mb-2 w-full"
+        />
+        
+        <p> Auteur : </p>
+        <input
+          type="text"
+          value={`${author.first_name} ${author.last_name}`}
+          disabled
+          className="border p-2 rounded mb-2 w-full bg-gray-200"
+        />
+
+        <p>Date de publication :</p>
+        <input
+          type="text"
+          value={newBook.publicationDate || 0}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (/^\d{0,4}$/.test(value)) { // Permet jusqu'à 4 chiffres uniquement
+              setNewBook({ ...newBook, publicationDate: parseInt(value, 10) || 0 });
+            }
+            
+          }}
+          placeholder="Année (4 chiffres)"
+          className="border p-2 rounded mb-4 w-full"
+        />
+
+        <p>Prix :</p>
+        <input
+          type="number"
+          placeholder="Prix"
+          value={newBook.price}
+          onChange={(e) => setNewBook({ ...newBook, price: parseInt(e.target.value) })}
+          className="border p-2 rounded mb-4 w-full"
+        />
+      </GenericModal>
+
+      {/* Modal Delete Auteur */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
           <div className="bg-white p-4 rounded shadow-lg">

@@ -7,6 +7,7 @@ export class BookDetail {
     yearPublished : number;
     authorName : string;
     reviews : Review[];
+    price : number;
 
 
     constructor(book : Book){
@@ -15,5 +16,6 @@ export class BookDetail {
         this.yearPublished = book.yearPublished;
         this.authorName = `${book.author.first_name} ${book.author.last_name}`;
         this.reviews = book.reviews;
+        this.price = book.price;
     }
 }

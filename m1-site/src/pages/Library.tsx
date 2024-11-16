@@ -10,12 +10,13 @@ import GenericModal from '../composants/GenericModal';
 
 const Library: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
+  const [authorsComponent, setAuthorsComponent] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortOption, setSortOption] = useState<string>('title');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [newBook, setNewBook] = useState<{ title: string; author: string; publicationDate: string, price: string }>({
+  const [newBook, setNewBook] = useState<{ title: string; author: number; publicationDate: string, price: string }>({
     title: '',
-    author: '',
+    author: 1,
     publicationDate: '',
     price: '',
   });
@@ -23,6 +24,12 @@ const Library: React.FC = () => {
   const fetchData = async () => {
     try {
       const response = await axios.get('http://localhost:3001/books');
+      const response2 = await axios.get('http://localhost:3001/authors');
+      let tableAuthor = [];
+      for(let author of response2.data){
+        tableAuthor.push(<option value={author.id}>{`${author.first_name} ${author.last_name}`}</option>)
+      }
+      setAuthorsComponent(tableAuthor);
       console.log('Réponse de la requête:', response.data);
      
       const fetchedBooks = response.data.map((book: any) => ({
@@ -44,39 +51,19 @@ const Library: React.FC = () => {
 
   const handleAddBook = async () => {
     // Validation des données
-    if (!newBook.title || !newBook.author || !newBook.publicationDate || !newBook.price) {
+    if (!newBook.title || !newBook.publicationDate || !newBook.price) {
       console.error('Tous les champs doivent être remplis');
       return;
     }
 
-    let authorId: number;
+
 
     try {
-      // Vérification de l'existence de l'auteur dans la base de données
-      const authorResponse = await axios.get('http://localhost:3001/authors', {
-        params: {
-          first_name: newBook.author.split(' ')[0], // Séparation du prénom et nom
-          last_name: newBook.author.split(' ')[1],
-        }
-      });
-
-      if (authorResponse.data.length > 0) {
-        // Si l'auteur existe, on récupère son ID
-        authorId = authorResponse.data[0].id;
-      } else {
-        // Si l'auteur n'existe pas, on crée un nouvel auteur
-        const newAuthor = {
-          first_name: newBook.author.split(' ')[0],
-          last_name: newBook.author.split(' ')[1],
-        };
-        const createAuthorResponse = await axios.post('http://localhost:3001/authors/create', newAuthor);
-        authorId = createAuthorResponse.data.id; // On récupère l'ID de l'auteur créé
-      }
-
+      
       // Données du livre à envoyer
       const newBookData = {
         title: newBook.title,
-        authorId, // L'ID de l'auteur
+        authorId: newBook.author, // L'ID de l'auteur
         yearPublished: parseInt(newBook.publicationDate, 10),
         mean: 0,
         price: parseFloat(newBook.price),
@@ -93,7 +80,7 @@ const Library: React.FC = () => {
       fetchData();
 
       // Réinitialisation des valeurs du formulaire après un ajout réussi
-      setNewBook({ title: '', author: '', publicationDate: '', price: '' });
+      setNewBook({ title: '', author: 1, publicationDate: '', price: '' });
       setIsModalOpen(false);
 
     } catch (error: any) {
@@ -141,7 +128,7 @@ const Library: React.FC = () => {
             <div key={book.id} className="p-4 border-b cursor-pointer">
               <h2 className="font-bold">{book.title}</h2>
               <p>Auteur: {book.author}</p>
-              <p>Date de publication: {new Date(book.publicationDate).toLocaleDateString()}</p>
+              <p>Date de publication: {book.publicationDate}</p>
               <p>Note moyenne: {book.averageRating}</p>
             </div>
           </Link>
@@ -162,17 +149,23 @@ const Library: React.FC = () => {
           onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
           className="border p-2 rounded mb-2 w-full"
         />
+        <select
+          onChange={(e) => setNewBook({ ...newBook, author: parseInt(e.target.value) })}
+          className="border p-2 rounded mb-2 w-full"
+        >
+        {authorsComponent}
+        </select>
+        <p>Date de publication :</p>
         <input
           type="text"
-          placeholder="Auteur"
-          value={newBook.author}
-          onChange={(e) => setNewBook({ ...newBook, author: e.target.value })}
-          className="border p-2 rounded mb-2 w-full"
-        />
-        <input
-          type="date"
           value={newBook.publicationDate}
-          onChange={(e) => setNewBook({ ...newBook, publicationDate: e.target.value })}
+          onChange={(e) => {
+            const value = e.target.value;
+            // Vérifier si la valeur correspond à une chaîne de 4 chiffres maximum
+            if (/^\d{0,4}$/.test(value)) {
+              setNewBook({ ...newBook, publicationDate: value });
+            }
+          }}
           className="border p-2 rounded mb-4 w-full"
         />
         <input

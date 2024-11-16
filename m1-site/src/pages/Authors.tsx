@@ -12,8 +12,10 @@ const Authors: React.FC = () => {
   const [authors, setAuthors] = useState<Author[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [newAuthor, setNewAuthor] = useState<{ name: string; photoUrl: string; bookCount: number; averageRating: number }>({
-    name: '',
+  const [newAuthor, setNewAuthor] = useState<{ lastname: string; firstname: string; bio: string; photoUrl: string; bookCount: number; averageRating: number }>({
+    lastname: '',
+    firstname: '',
+    bio: '',
     photoUrl: '',
     bookCount: 0,
     averageRating: 0,
@@ -46,10 +48,10 @@ const Authors: React.FC = () => {
     try {
      
       const payload = {
-        first_name: newAuthor.name.split(' ')[0] || '', 
-        last_name: newAuthor.name.split(' ')[1] || '',
+        first_name: newAuthor.firstname || '', 
+        last_name: newAuthor.lastname || '',
         picture: newAuthor.photoUrl,
-        bio: `Auteur de ${newAuthor.bookCount} livre(s).`, 
+        bio: newAuthor.bio || `Auteur de ${newAuthor.bookCount} livre(s).`, 
       };
   
      
@@ -59,14 +61,14 @@ const Authors: React.FC = () => {
      
       const createdAuthor: Author = {
         id: response.data.id,
-        name: newAuthor.name,
+        name: `${newAuthor.firstname} ${newAuthor.lastname}` ,
         photoUrl: newAuthor.photoUrl,
         bookCount: newAuthor.bookCount,
         averageRating: newAuthor.averageRating,
       };
   
       setAuthors([...authors, createdAuthor]);
-      setNewAuthor({ name: '', photoUrl: '', bookCount: 0, averageRating: 0 });
+      setNewAuthor({ lastname: '', firstname: '', bio: '', photoUrl: '', bookCount: 0, averageRating: 0 });
       setIsModalOpen(false);
     } catch (error) {
       console.error('Erreur lors de l’ajout de l’auteur :', error);
@@ -117,8 +119,15 @@ const Authors: React.FC = () => {
         <input
           type="text"
           placeholder="Nom de l'auteur"
-          value={newAuthor.name}
-          onChange={(e) => setNewAuthor({ ...newAuthor, name: e.target.value })}
+          value={newAuthor.lastname}
+          onChange={(e) => setNewAuthor({ ...newAuthor, lastname: e.target.value })}
+          className="border p-2 rounded mb-2 w-full"
+        />
+        <input
+          type="text"
+          placeholder="Prénom"
+          value={newAuthor.firstname}
+          onChange={(e) => setNewAuthor({ ...newAuthor, firstname: e.target.value })}
           className="border p-2 rounded mb-2 w-full"
         />
         <input
@@ -129,19 +138,13 @@ const Authors: React.FC = () => {
           className="border p-2 rounded mb-2 w-full"
         />
         <input
-          type="number"
-          placeholder="Nombre de livres"
-          value={newAuthor.bookCount}
-          onChange={(e) => setNewAuthor({ ...newAuthor, bookCount: Number(e.target.value) })}
+          type="text"
+          placeholder="Biographie"
+          value={newAuthor.bio}
+          onChange={(e) => setNewAuthor({ ...newAuthor, bio: e.target.value })}
           className="border p-2 rounded mb-2 w-full"
         />
-        <input
-          type="number"
-          placeholder="Note moyenne"
-          value={newAuthor.averageRating}
-          onChange={(e) => setNewAuthor({ ...newAuthor, averageRating: Number(e.target.value) })}
-          className="border p-2 rounded mb-4 w-full"
-        />
+        
       </GenericModal>
     </div>
   );
