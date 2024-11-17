@@ -6,6 +6,6 @@ Exament S1 M1 Technologies Web
 - Hugo Vitse
 - Rémi Degraeve
 
-### Démarrage du Backend : npm start (Démarrage sur le port 3001)
+### Démarrage du Backend (m1-api) : npm start (Démarrage sur le port 3001)
 
-### Démarrage du FrontEnd : npm start (Démarrage sur le port 3000)
+### Démarrage du FrontEnd (m1-site) : npm start (Démarrage sur le port 3000)
