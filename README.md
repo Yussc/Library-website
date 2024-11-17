@@ -1,6 +1,11 @@
 # Library-website
 Exament S1 M1 Technologies Web
 
-## Démarrage du Backend : npm start (Démarrage sur le port 3001)
+## Groupe :
+- Yassine Chiadmi
+- Hugo Vitse
+- Rémi Degraeve
 
-## Démarrage du FrontEnd : npm start (Démarrage sur le port 3000)
+### Démarrage du Backend : npm start (Démarrage sur le port 3001)
+
+### Démarrage du FrontEnd : npm start (Démarrage sur le port 3000)
